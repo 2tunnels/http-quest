@@ -5,7 +5,7 @@ from http_quest import passwords
 from http_quest.main import application
 
 
-def test_level_1_require_password():
+def test_level_1_require_password() -> None:
     client = TestClient(application)
     response = client.get("/level-1")
 
@@ -13,7 +13,7 @@ def test_level_1_require_password():
     assert response.text == "X-Password header is required"
 
 
-def test_level_1_wrong_password():
+def test_level_1_wrong_password() -> None:
     client = TestClient(application)
     response = client.get("/level-1", headers={"X-Password": "qwerty"})
 
@@ -21,7 +21,7 @@ def test_level_1_wrong_password():
     assert response.text == "X-Password header is wrong"
 
 
-def test_level_1_correct_password():
+def test_level_1_correct_password() -> None:
     client = TestClient(application)
     response = client.get("/level-1", headers={"X-Password": passwords.LEVEL_1})
 

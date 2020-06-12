@@ -1,15 +1,19 @@
 from functools import wraps
+from typing import Any, Callable
 
 from starlette.endpoints import HTTPEndpoint
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
+from starlette.responses import Response
 from starlette.status import HTTP_403_FORBIDDEN
 
 
-def require_password(password: str):
-    def decorator(func):
+def require_password(password: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
-        async def wrapper(endpoint: HTTPEndpoint, request: Request, *args, **kwargs):
+        async def wrapper(
+            endpoint: HTTPEndpoint, request: Request, *args: Any, **kwargs: Any
+        ) -> Response:
             provided_password = request.headers.get("x-password", "")
 
             if not provided_password:
@@ -23,7 +27,9 @@ def require_password(password: str):
                     status_code=HTTP_403_FORBIDDEN, detail="X-Password header is wrong"
                 )
 
-            return await func(endpoint, request, *args, **kwargs)
+            response: Response = await func(endpoint, request, *args, **kwargs)
+
+            return response
 
         return wrapper
 
