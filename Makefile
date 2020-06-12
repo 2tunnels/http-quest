@@ -1,5 +1,5 @@
 test:
-	pytest -vv
+	pytest -vv --cov=http_quest --cov-report=term-missing
 
 isort:
 	isort --recursive .
