@@ -5,7 +5,7 @@ from .endpoints import Home, Level1
 
 routes = [
     Route("/", Home),
-    Route("/level1", Level1),
+    Route("/level-1", Level1),
 ]
 
 application = Starlette(routes=routes)

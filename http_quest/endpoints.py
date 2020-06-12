@@ -15,4 +15,4 @@ class Home(HTTPEndpoint):
 class Level1(HTTPEndpoint):
     @require_password(passwords.LEVEL_1)
     async def get(self, request: Request) -> JSONResponse:
-        return JSONResponse({"password": "foobar"})
+        return JSONResponse({"password": passwords.LEVEL_2})

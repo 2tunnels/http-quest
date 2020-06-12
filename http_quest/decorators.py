@@ -15,12 +15,12 @@ def require_password(password: str):
             if not provided_password:
                 raise HTTPException(
                     status_code=HTTP_403_FORBIDDEN,
-                    detail="X-Password header is missing",
+                    detail="X-Password header is required",
                 )
 
             if provided_password != password:
                 raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Wrong password"
+                    status_code=HTTP_403_FORBIDDEN, detail="X-Password header is wrong"
                 )
 
             return await func(endpoint, request, *args, **kwargs)
