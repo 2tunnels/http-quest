@@ -24,4 +24,4 @@ lint-safety:
 lint: lint-isort lint-black lint-mypy lint-safety
 
 uvicorn:
-	uvicorn http_quest.main:application --reload
+	uvicorn http_quest.asgi:application --reload

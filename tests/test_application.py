@@ -2,7 +2,7 @@ from starlette.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from starlette.testclient import TestClient
 
 from http_quest import passwords
-from http_quest.main import application
+from http_quest.app import application
 from http_quest.utils import reverse
 
 # TODO: Refactor application and test client into fixtures.
