@@ -29,3 +29,10 @@ async def level_3(request: Request) -> JSONResponse:
     """Return base64 encoded password for next level."""
 
     return JSONResponse({"password": base64_encode(passwords.LEVEL_4)})
+
+
+@require_password(passwords.LEVEL_4)
+async def level_4(request: Request) -> JSONResponse:
+    return JSONResponse(
+        {"password": "qwerty"}, headers={"X-Real-Password": passwords.LEVEL_5}
+    )

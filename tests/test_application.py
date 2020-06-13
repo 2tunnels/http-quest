@@ -40,3 +40,11 @@ def test_level_3(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert decoded_password == passwords.LEVEL_4
+
+
+def test_level_4(client: TestClient) -> None:
+    response = client.get("/level-4", headers={"X-Password": passwords.LEVEL_4})
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {"password": "qwerty"}
+    assert response.headers["X-Real-Password"] == passwords.LEVEL_5
