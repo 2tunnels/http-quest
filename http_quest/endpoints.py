@@ -1,5 +1,9 @@
+from typing import Union
+
+from starlette.exceptions import HTTPException
 from starlette.requests import Request
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
+from starlette.status import HTTP_400_BAD_REQUEST
 
 from . import passwords
 from .decorators import require_password
@@ -45,3 +49,51 @@ async def level_5(request: Request) -> JSONResponse:
     """Return plain password. Endpoint will be available only for DELETE method."""
 
     return JSONResponse({"password": passwords.LEVEL_6})
+
+
+@require_password(passwords.LEVEL_6)
+async def level_6(request: Request) -> Union[RedirectResponse, JSONResponse]:
+    """Return plain password if user follows redirect chain."""
+
+    chain_of_secrets = [
+        "itR6F7k4EA",
+        "sNbQSNNMjQ",
+        "8kwWsi3pos",
+        "OGNqhAqqKR",
+        "EQBJeRAjgZ",
+        "1ISDOG1PmQ",
+        "E1mlttngnT",
+        "TdEW5CQfaD",
+        "WECCgzfBg3",
+        "D27AChlgXU",
+        "aZsQKifS73",
+        "d6B8h2m0WV",
+        "NBzxKHhqf7",
+        "a1pgijek8d",
+        "z2K6Y09o0D",
+        "n3ghhMg9Vk",
+        "gIGp1dhqVp",
+        "lZMctcrR0u",
+        "aXdbPBjCRX",
+        "lKTGjukENC",
+    ]
+
+    secret = request.query_params.get("secret", "")
+
+    if not secret:
+        redirect_url = request.url_for("level_6") + "?secret=" + chain_of_secrets[0]
+        return RedirectResponse(redirect_url)
+
+    try:
+        index = chain_of_secrets.index(secret)
+    except ValueError:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Wrong secret")
+
+    try:
+        next_secret = chain_of_secrets[index + 1]
+    except IndexError:
+        return JSONResponse({"password": passwords.LEVEL_7})
+
+    redirect_url = request.url_for("level_6") + "?secret=" + next_secret
+
+    return RedirectResponse(redirect_url)

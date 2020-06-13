@@ -1,5 +1,7 @@
 from starlette.status import (
     HTTP_200_OK,
+    HTTP_307_TEMPORARY_REDIRECT,
+    HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_405_METHOD_NOT_ALLOWED,
 )
@@ -68,3 +70,19 @@ def test_level_5(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert response.json() == {"password": passwords.LEVEL_6}
+
+
+def test_level_6_wrong_secret(client: TestClient) -> None:
+    response = client.get(
+        "/level-6?secret=qwerty", headers={"X-Password": passwords.LEVEL_6}
+    )
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.text == "Wrong secret"
+
+
+def test_level_6(client: TestClient) -> None:
+    response = client.get("/level-6", headers={"X-Password": passwords.LEVEL_6})
+
+    assert response.status_code == HTTP_200_OK
+    assert len(response.history) == 20

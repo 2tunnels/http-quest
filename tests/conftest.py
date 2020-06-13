@@ -13,6 +13,7 @@ from http_quest.asgi import application
         {"path": "/level-3", "method": "GET"},
         {"path": "/level-4", "method": "GET"},
         {"path": "/level-5", "method": "DELETE"},
+        {"path": "/level-6", "method": "GET"},
     ]
 )
 def level(request: SubRequest) -> dict:
