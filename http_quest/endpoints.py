@@ -11,7 +11,7 @@ from starlette.status import (
 
 from . import passwords
 from .decorators import require_password
-from .utils import base64_encode, reverse
+from .utils import base64_encode, mask, reverse
 
 
 async def home(request: Request) -> PlainTextResponse:
@@ -168,3 +168,16 @@ async def level_9(request: Request) -> JSONResponse:
         )
 
     return JSONResponse({"пароль": passwords.LEVEL_10})
+
+
+@require_password(passwords.LEVEL_10)
+async def level_10_entry(request: Request) -> JSONResponse:
+    return JSONResponse({"url": request.url_for("level_10_secret", secret="{secret}")})
+
+
+@require_password(passwords.LEVEL_10)
+async def level_10_secret(request: Request) -> JSONResponse:
+    secret = "6fjeXUuve5Wm2nR6gsbQ"
+    given_secret = request.path_params["secret"]
+
+    return JSONResponse({"password": mask(passwords.LEVEL_11, secret, given_secret)})
