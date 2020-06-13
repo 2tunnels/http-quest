@@ -1,6 +1,5 @@
 from starlette.status import (
     HTTP_200_OK,
-    HTTP_307_TEMPORARY_REDIRECT,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_405_METHOD_NOT_ALLOWED,
@@ -86,3 +85,26 @@ def test_level_6(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert len(response.history) == 20
+
+
+def test_level_7_non_ie_6(client: TestClient) -> None:
+    response = client.get("/level-7", headers={"X-Password": passwords.LEVEL_7})
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.text == (
+        "Password for the next level is only available for the bravest! "
+        "Internet Explorer 6 users!"
+    )
+
+
+def test_level_7(client: TestClient) -> None:
+    response = client.get(
+        "/level-7",
+        headers={
+            "X-Password": passwords.LEVEL_7,
+            "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",
+        },
+    )
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {"password": passwords.LEVEL_8}

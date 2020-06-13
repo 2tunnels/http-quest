@@ -1,7 +1,16 @@
 from starlette.applications import Starlette
 from starlette.routing import Route
 
-from .endpoints import home, level_1, level_2, level_3, level_4, level_5, level_6
+from .endpoints import (
+    home,
+    level_1,
+    level_2,
+    level_3,
+    level_4,
+    level_5,
+    level_6,
+    level_7,
+)
 
 
 def get_application() -> Starlette:
@@ -13,6 +22,7 @@ def get_application() -> Starlette:
         Route("/level-4", level_4, name="level_4"),
         Route("/level-5", level_5, name="level_5", methods=["DELETE"]),
         Route("/level-6", level_6, name="level_6"),
+        Route("/level-7", level_7, name="level_7"),
     ]
 
     return Starlette(routes=routes)

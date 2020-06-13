@@ -3,7 +3,7 @@ from typing import Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from starlette.status import HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from . import passwords
 from .decorators import require_password
@@ -97,3 +97,21 @@ async def level_6(request: Request) -> Union[RedirectResponse, JSONResponse]:
     redirect_url = request.url_for("level_6") + "?secret=" + next_secret
 
     return RedirectResponse(redirect_url)
+
+
+@require_password(passwords.LEVEL_7)
+async def level_7(request: Request) -> JSONResponse:
+    """Return plain password for users with Internet Explorer 6 user agent."""
+
+    user_agent = request.headers.get("user-agent", "").lower()
+
+    if "msie 6.0" not in user_agent:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail=(
+                "Password for the next level is only available for the bravest! "
+                "Internet Explorer 6 users!"
+            ),
+        )
+
+    return JSONResponse({"password": passwords.LEVEL_8})
