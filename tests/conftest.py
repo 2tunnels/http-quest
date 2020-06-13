@@ -5,6 +5,11 @@ from starlette.testclient import TestClient
 from http_quest.asgi import application
 
 
+@pytest.fixture(params=["/level-1", "/level-2"])
+def level_path(request):
+    return request.param
+
+
 @pytest.fixture
 def app() -> Starlette:
     return application
