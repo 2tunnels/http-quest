@@ -1,4 +1,5 @@
 import pytest
+from _pytest.fixtures import SubRequest
 from starlette.applications import Starlette
 from starlette.testclient import TestClient
 
@@ -6,8 +7,10 @@ from http_quest.asgi import application
 
 
 @pytest.fixture(params=["/level-1", "/level-2"])
-def level_path(request):
-    return request.param
+def level_path(request: SubRequest) -> str:
+    param: str = request.param
+
+    return param
 
 
 @pytest.fixture
