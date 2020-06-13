@@ -6,9 +6,17 @@ from starlette.testclient import TestClient
 from http_quest.asgi import application
 
 
-@pytest.fixture(params=["/level-1", "/level-2", "/level-3", "/level-4"])
-def level_path(request: SubRequest) -> str:
-    param: str = request.param
+@pytest.fixture(
+    params=[
+        {"path": "/level-1", "method": "GET"},
+        {"path": "/level-2", "method": "GET"},
+        {"path": "/level-3", "method": "GET"},
+        {"path": "/level-4", "method": "GET"},
+        {"path": "/level-5", "method": "DELETE"},
+    ]
+)
+def level(request: SubRequest) -> dict:
+    param: dict = request.param
 
     return param
 
