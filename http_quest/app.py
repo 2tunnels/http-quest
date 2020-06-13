@@ -10,6 +10,7 @@ from .endpoints import (
     level_5,
     level_6,
     level_7,
+    level_8,
 )
 
 
@@ -23,6 +24,7 @@ def get_application() -> Starlette:
         Route("/level-5", level_5, name="level_5", methods=["DELETE"]),
         Route("/level-6", level_6, name="level_6"),
         Route("/level-7", level_7, name="level_7"),
+        Route("/level-8", level_8, name="level_8"),
     ]
 
     return Starlette(routes=routes)

@@ -3,7 +3,7 @@ from typing import Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from starlette.status import HTTP_403_FORBIDDEN
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from . import passwords
 from .decorators import require_password
@@ -115,3 +115,35 @@ async def level_7(request: Request) -> JSONResponse:
         )
 
     return JSONResponse({"password": passwords.LEVEL_8})
+
+
+@require_password(passwords.LEVEL_8)
+async def level_8(request: Request) -> JSONResponse:
+    provided_number = request.query_params.get("number")
+
+    if not provided_number:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail=(
+                "Guess the number between 1 and 1000. "
+                "Provide you guess with 'number' query parameter."
+            ),
+        )
+
+    try:
+        provided_number = int(provided_number)
+    except ValueError:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Please provide a number."
+        )
+
+    if provided_number < 1 or provided_number > 1000:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"{provided_number} is not between 1 and 1000.",
+        )
+
+    if provided_number != 372:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Wrong number.")
+
+    return JSONResponse({"password": passwords.LEVEL_9})

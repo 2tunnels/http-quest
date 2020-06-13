@@ -1,5 +1,6 @@
 from starlette.status import (
     HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_405_METHOD_NOT_ALLOWED,
 )
@@ -107,3 +108,49 @@ def test_level_7(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert response.json() == {"password": passwords.LEVEL_8}
+
+
+def test_level_8_number_is_not_provided(client: TestClient) -> None:
+    response = client.get("/level-8", headers={"X-Password": passwords.LEVEL_8})
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.text == (
+        "Guess the number between 1 and 1000. "
+        "Provide you guess with 'number' query parameter."
+    )
+
+
+def test_level_8_number_is_not_an_integer(client: TestClient) -> None:
+    response = client.get(
+        "/level-8?number=foobar", headers={"X-Password": passwords.LEVEL_8}
+    )
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.text == "Please provide a number."
+
+
+def test_level_8_number_invalid_range(client: TestClient) -> None:
+    response = client.get(
+        "/level-8?number=0", headers={"X-Password": passwords.LEVEL_8}
+    )
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.text == "0 is not between 1 and 1000."
+
+
+def test_level_8_wrong_number(client: TestClient) -> None:
+    response = client.get(
+        "/level-8?number=100", headers={"X-Password": passwords.LEVEL_8}
+    )
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.text == "Wrong number."
+
+
+def test_level_8(client: TestClient) -> None:
+    response = client.get(
+        "/level-8?number=372", headers={"X-Password": passwords.LEVEL_8}
+    )
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {"password": passwords.LEVEL_9}
