@@ -11,3 +11,31 @@ def base64_encode(text: str) -> str:
 
 def base64_decode(text: str) -> str:
     return standard_b64decode(text.encode("utf-8")).decode("utf-8")
+
+
+def mask(password: str, secret: str, given_secret: str) -> str:
+    """
+    Use secret correctness as a password mask.
+    For each correct secret character, password character in the same position will be
+    exposed.
+    """
+
+    if len(password) != len(secret):
+        raise ValueError("Password and secret should be the same length")
+
+    masked_password = ""
+
+    for index in range(len(secret)):
+        try:
+            is_same_character = secret[index] == given_secret[index]
+        except IndexError:
+            masked_password += "*"
+            continue
+
+        if is_same_character:
+            masked_password += password[index]
+            continue
+
+        masked_password += "*"
+
+    return masked_password
