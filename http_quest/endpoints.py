@@ -12,9 +12,9 @@ async def home(request: Request) -> PlainTextResponse:
 
 @require_password(passwords.LEVEL_1)
 async def level_1(request: Request) -> JSONResponse:
-    return JSONResponse({reverse("password"): reverse(passwords.LEVEL_2)})
+    return JSONResponse({"password": passwords.LEVEL_2})
 
 
 @require_password(passwords.LEVEL_2)
 async def level_2(request: Request) -> JSONResponse:
-    return JSONResponse({"password": passwords.LEVEL_3})
+    return JSONResponse({reverse("password"): reverse(passwords.LEVEL_3)})

@@ -23,11 +23,11 @@ def test_level_1(client: TestClient) -> None:
     response = client.get("/level-1", headers={"X-Password": passwords.LEVEL_1})
 
     assert response.status_code == HTTP_200_OK
-    assert response.json() == {reverse("password"): reverse(passwords.LEVEL_2)}
+    assert response.json() == {"password": passwords.LEVEL_2}
 
 
 def test_level_2(client: TestClient) -> None:
     response = client.get("/level-2", headers={"X-Password": passwords.LEVEL_2})
 
     assert response.status_code == HTTP_200_OK
-    assert response.json() == {"password": passwords.LEVEL_3}
+    assert response.json() == {reverse("password"): reverse(passwords.LEVEL_3)}
