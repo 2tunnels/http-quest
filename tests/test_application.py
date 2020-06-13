@@ -1,6 +1,5 @@
 from starlette.status import (
     HTTP_200_OK,
-    HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_405_METHOD_NOT_ALLOWED,
 )
@@ -76,7 +75,7 @@ def test_level_6_wrong_secret(client: TestClient) -> None:
         "/level-6?secret=qwerty", headers={"X-Password": passwords.LEVEL_6}
     )
 
-    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.status_code == HTTP_403_FORBIDDEN
     assert response.text == "Wrong secret"
 
 

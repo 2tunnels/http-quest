@@ -3,7 +3,7 @@ from typing import Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_403_FORBIDDEN
 
 from . import passwords
 from .decorators import require_password
@@ -87,7 +87,7 @@ async def level_6(request: Request) -> Union[RedirectResponse, JSONResponse]:
     try:
         index = chain_of_secrets.index(secret)
     except ValueError:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Wrong secret")
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Wrong secret")
 
     try:
         next_secret = chain_of_secrets[index + 1]
