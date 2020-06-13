@@ -3,7 +3,11 @@ from typing import Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_406_NOT_ACCEPTABLE,
+)
 
 from . import passwords
 from .decorators import require_password
@@ -147,3 +151,16 @@ async def level_8(request: Request) -> JSONResponse:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Wrong number.")
 
     return JSONResponse({"password": passwords.LEVEL_9})
+
+
+@require_password(passwords.LEVEL_9)
+async def level_9(request: Request) -> JSONResponse:
+    accept_language = request.headers.get("accept-language", "").lower()
+
+    if "ru" not in accept_language:
+        raise HTTPException(
+            status_code=HTTP_406_NOT_ACCEPTABLE,
+            detail="Я говорю только по русски, товарищ.",
+        )
+
+    return JSONResponse({"пароль": passwords.LEVEL_10})

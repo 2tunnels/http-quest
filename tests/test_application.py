@@ -3,6 +3,7 @@ from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_405_METHOD_NOT_ALLOWED,
+    HTTP_406_NOT_ACCEPTABLE,
 )
 from starlette.testclient import TestClient
 
@@ -154,3 +155,30 @@ def test_level_8(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert response.json() == {"password": passwords.LEVEL_9}
+
+
+def test_level_9_accept_language_is_not_provided(client: TestClient) -> None:
+    response = client.get("/level-9", headers={"X-Password": passwords.LEVEL_9})
+
+    assert response.status_code == HTTP_406_NOT_ACCEPTABLE
+    assert response.text == "Я говорю только по русски, товарищ."
+
+
+def test_level_9_non_russian_accept_language(client: TestClient) -> None:
+    response = client.get(
+        "/level-9",
+        headers={"X-Password": passwords.LEVEL_9, "Accept-Language": "en-US,en;q=0.5"},
+    )
+
+    assert response.status_code == HTTP_406_NOT_ACCEPTABLE
+    assert response.text == "Я говорю только по русски, товарищ."
+
+
+def test_level_9(client: TestClient) -> None:
+    response = client.get(
+        "/level-9",
+        headers={"X-Password": passwords.LEVEL_9, "Accept-Language": "ru-RU"},
+    )
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {"пароль": passwords.LEVEL_10}
