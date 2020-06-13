@@ -4,6 +4,7 @@ from starlette.responses import JSONResponse, PlainTextResponse
 
 from . import passwords
 from .decorators import require_password
+from .utils import reverse
 
 
 class Home(HTTPEndpoint):
@@ -15,4 +16,10 @@ class Home(HTTPEndpoint):
 class Level1(HTTPEndpoint):
     @require_password(passwords.LEVEL_1)
     async def get(self, request: Request) -> JSONResponse:
-        return JSONResponse({"password": passwords.LEVEL_2})
+        return JSONResponse({reverse("password"): reverse(passwords.LEVEL_2)})
+
+
+class Level2(HTTPEndpoint):
+    @require_password(passwords.LEVEL_2)
+    async def get(self, request: Request) -> JSONResponse:
+        return JSONResponse({"password": passwords.LEVEL_3})
