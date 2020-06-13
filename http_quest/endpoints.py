@@ -123,6 +123,8 @@ async def level_7(request: Request) -> JSONResponse:
 
 @require_password(passwords.LEVEL_8)
 async def level_8(request: Request) -> JSONResponse:
+    """Return plain password for users who guessed the secret number."""
+
     provided_number = request.query_params.get("number")
 
     if not provided_number:
@@ -155,6 +157,8 @@ async def level_8(request: Request) -> JSONResponse:
 
 @require_password(passwords.LEVEL_9)
 async def level_9(request: Request) -> JSONResponse:
+    """Return plain password only for russian Accept-Language header."""
+
     accept_language = request.headers.get("accept-language", "").lower()
 
     if "ru" not in accept_language:
