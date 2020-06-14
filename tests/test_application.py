@@ -189,16 +189,20 @@ def test_level_9(client: TestClient) -> None:
     assert response.json() == {"пароль": passwords.LEVEL_10}
 
 
-def test_level_10_entry(client: TestClient) -> None:
-    response = client.get("/level-10", headers={"X-Password": passwords.LEVEL_10})
+def test_level_10_secret_is_missing(client: TestClient) -> None:
+    response = client.post("/level-10", headers={"X-Password": passwords.LEVEL_10})
 
-    assert response.status_code == HTTP_200_OK
-    assert response.json() == {"url": "http://testserver/level-10/{secret}"}
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {"secret": ["Missing data for required field."]}
+    }
 
 
 def test_level_10_secret_wrong_secret(client: TestClient) -> None:
-    response = client.get(
-        "/level-10/eeeeeeeeeeeeeeeeeeee", headers={"X-Password": passwords.LEVEL_10}
+    response = client.post(
+        "/level-10",
+        headers={"X-Password": passwords.LEVEL_10},
+        json={"secret": "eeeeeeeeeeeeeeeeeeee"},
     )
 
     assert response.status_code == HTTP_200_OK
@@ -206,8 +210,10 @@ def test_level_10_secret_wrong_secret(client: TestClient) -> None:
 
 
 def test_level_10_secret(client: TestClient) -> None:
-    response = client.get(
-        "/level-10/6fjeXUuve5Wm2nR6gsbQ", headers={"X-Password": passwords.LEVEL_10}
+    response = client.post(
+        "/level-10",
+        headers={"X-Password": passwords.LEVEL_10},
+        json={"secret": "6fjeXUuve5Wm2nR6gsbQ"},
     )
 
     assert response.status_code == HTTP_200_OK

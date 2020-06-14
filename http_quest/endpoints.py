@@ -13,7 +13,7 @@ from starlette.status import (
 
 from . import passwords
 from .decorators import require_password
-from .schemas import Level8Schema
+from .schemas import Level8Schema, Level10Schema
 from .utils import base64_encode, mask, reverse
 
 
@@ -162,13 +162,19 @@ async def level_9(request: Request) -> JSONResponse:
 
 
 @require_password(passwords.LEVEL_10)
-async def level_10_entry(request: Request) -> JSONResponse:
-    return JSONResponse({"url": request.url_for("level_10_secret", secret="{secret}")})
+async def level_10(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+    except JSONDecodeError:
+        body = {}
 
+    schema = Level10Schema()
 
-@require_password(passwords.LEVEL_10)
-async def level_10_secret(request: Request) -> JSONResponse:
-    secret = "6fjeXUuve5Wm2nR6gsbQ"
-    given_secret = request.path_params["secret"]
+    try:
+        data = schema.load(body)
+    except ValidationError as exc:
+        return JSONResponse({"errors": exc.messages}, status_code=HTTP_400_BAD_REQUEST)
 
-    return JSONResponse({"password": mask(passwords.LEVEL_11, secret, given_secret)})
+    return JSONResponse(
+        {"password": mask(passwords.LEVEL_11, "6fjeXUuve5Wm2nR6gsbQ", data["secret"])}
+    )
