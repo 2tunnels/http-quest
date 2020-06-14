@@ -11,14 +11,20 @@ from starlette.status import (
     HTTP_406_NOT_ACCEPTABLE,
 )
 
-from . import passwords
+from . import passwords, secrets
 from .decorators import require_password
-from .schemas import Level8Schema, Level10Schema
+from .schemas import Level8Schema, SecretSchema
 from .utils import base64_encode, mask, reverse
 
 
 async def home(request: Request) -> PlainTextResponse:
     return PlainTextResponse(passwords.LEVEL_1)
+
+
+async def robots_txt(request: Request) -> PlainTextResponse:
+    return PlainTextResponse(
+        f"User-agent: *\nDisallow:\n\n# Level 11 secret: {secrets.LEVEL_11}\n"
+    )
 
 
 @require_password(passwords.LEVEL_1)
@@ -170,7 +176,7 @@ async def level_10(request: Request) -> JSONResponse:
     except JSONDecodeError:
         body = {}
 
-    schema = Level10Schema()
+    schema = SecretSchema()
 
     try:
         data = schema.load(body)
@@ -180,3 +186,25 @@ async def level_10(request: Request) -> JSONResponse:
     return JSONResponse(
         {"password": mask(passwords.LEVEL_11, "6fjeXUuve5Wm2nR6gsbQ", data["secret"])}
     )
+
+
+@require_password(passwords.LEVEL_11)
+async def level_11(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+    except JSONDecodeError:
+        body = {}
+
+    schema = SecretSchema()
+
+    try:
+        data = schema.load(body)
+    except ValidationError as exc:
+        return JSONResponse({"errors": exc.messages}, status_code=HTTP_400_BAD_REQUEST)
+
+    if data["secret"] != secrets.LEVEL_11:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="Wrong secret, human."
+        )
+
+    return JSONResponse({"password": passwords.LEVEL_12})

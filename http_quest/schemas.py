@@ -5,5 +5,5 @@ class Level8Schema(Schema):
     number = fields.Integer(required=True, validate=validate.Range(min=1, max=1000))
 
 
-class Level10Schema(Schema):
+class SecretSchema(Schema):
     secret = fields.String(required=True)

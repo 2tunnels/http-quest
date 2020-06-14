@@ -13,12 +13,15 @@ from .endpoints import (
     level_8,
     level_9,
     level_10,
+    level_11,
+    robots_txt,
 )
 
 
 def get_application() -> Starlette:
     routes = [
         Route("/", home, name="home"),
+        Route("/robots.txt", robots_txt, name="robots_txt"),
         Route("/level-1", level_1, name="level_1"),
         Route("/level-2", level_2, name="level_2"),
         Route("/level-3", level_3, name="level_3"),
@@ -29,6 +32,7 @@ def get_application() -> Starlette:
         Route("/level-8", level_8, name="level_8", methods=["POST"]),
         Route("/level-9", level_9, name="level_9"),
         Route("/level-10", level_10, name="level_10", methods=["POST"]),
+        Route("/level-11", level_11, name="level_11", methods=["POST"]),
     ]
 
     return Starlette(routes=routes)

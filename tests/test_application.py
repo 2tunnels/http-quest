@@ -7,8 +7,15 @@ from starlette.status import (
 )
 from starlette.testclient import TestClient
 
-from http_quest import passwords
+from http_quest import passwords, secrets
 from http_quest.utils import base64_decode, reverse
+
+
+def test_robots_txt(client: TestClient) -> None:
+    response = client.get("/robots.txt")
+
+    assert response.status_code == HTTP_200_OK
+    assert "Level 11 secret" in response.text
 
 
 def test_require_password(level: dict, client: TestClient) -> None:
@@ -218,3 +225,34 @@ def test_level_10_secret(client: TestClient) -> None:
 
     assert response.status_code == HTTP_200_OK
     assert response.json() == {"password": passwords.LEVEL_11}
+
+
+def test_level_11_secret_is_missing(client: TestClient) -> None:
+    response = client.post("/level-11", headers={"X-Password": passwords.LEVEL_11})
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {"secret": ["Missing data for required field."]}
+    }
+
+
+def test_level_11_secret_wrong_secret(client: TestClient) -> None:
+    response = client.post(
+        "/level-11",
+        headers={"X-Password": passwords.LEVEL_11},
+        json={"secret": "foobar"},
+    )
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.text == "Wrong secret, human."
+
+
+def test_level_11_secret(client: TestClient) -> None:
+    response = client.post(
+        "/level-11",
+        headers={"X-Password": passwords.LEVEL_11},
+        json={"secret": secrets.LEVEL_11},
+    )
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {"password": passwords.LEVEL_12}
