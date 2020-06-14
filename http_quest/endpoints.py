@@ -163,6 +163,8 @@ async def level_9(request: Request) -> JSONResponse:
 
 @require_password(passwords.LEVEL_10)
 async def level_10(request: Request) -> JSONResponse:
+    """Return masked password, based on correctness of given secret."""
+
     try:
         body = await request.json()
     except JSONDecodeError:
