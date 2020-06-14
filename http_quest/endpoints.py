@@ -1,5 +1,7 @@
+from json import JSONDecodeError
 from typing import Union
 
+from marshmallow import ValidationError
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse
@@ -11,6 +13,7 @@ from starlette.status import (
 
 from . import passwords
 from .decorators import require_password
+from .schemas import Level8Schema
 from .utils import base64_encode, mask, reverse
 
 
@@ -125,31 +128,21 @@ async def level_7(request: Request) -> JSONResponse:
 async def level_8(request: Request) -> JSONResponse:
     """Return plain password for users who guessed the secret number."""
 
-    provided_number = request.query_params.get("number")
+    try:
+        body = await request.json()
+    except JSONDecodeError:
+        body = {}
 
-    if not provided_number:
-        raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN,
-            detail=(
-                "Guess the number between 1 and 1000. "
-                "Provide you guess with 'number' query parameter."
-            ),
-        )
+    schema = Level8Schema()
 
     try:
-        provided_number = int(provided_number)
-    except ValueError:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="Please provide a number."
-        )
+        data = schema.load(body)
+    except ValidationError as exc:
+        return JSONResponse({"errors": exc.messages}, status_code=HTTP_400_BAD_REQUEST)
 
-    if provided_number < 1 or provided_number > 1000:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail=f"{provided_number} is not between 1 and 1000.",
-        )
+    given_number = data["number"]
 
-    if provided_number != 372:
+    if given_number != 372:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Wrong number.")
 
     return JSONResponse({"password": passwords.LEVEL_9})

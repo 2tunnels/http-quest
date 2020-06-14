@@ -111,32 +111,37 @@ def test_level_7(client: TestClient) -> None:
     assert response.json() == {"password": passwords.LEVEL_8}
 
 
-def test_level_8_number_is_not_provided(client: TestClient) -> None:
-    response = client.get("/level-8", headers={"X-Password": passwords.LEVEL_8})
+def test_level_8_number_is_missing(client: TestClient) -> None:
+    response = client.post("/level-8", headers={"X-Password": passwords.LEVEL_8})
 
-    assert response.status_code == HTTP_403_FORBIDDEN
-    assert response.text == (
-        "Guess the number between 1 and 1000. "
-        "Provide you guess with 'number' query parameter."
-    )
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {"number": ["Missing data for required field."]}
+    }
 
 
-def test_level_8_number_is_not_an_integer(client: TestClient) -> None:
-    response = client.get(
-        "/level-8?number=foobar", headers={"X-Password": passwords.LEVEL_8}
+def test_level_8_number_is_not_a_valid_integer(client: TestClient) -> None:
+    response = client.post(
+        "/level-8", headers={"X-Password": passwords.LEVEL_8}, json={"number": "foobar"}
     )
 
     assert response.status_code == HTTP_400_BAD_REQUEST
-    assert response.text == "Please provide a number."
+    assert response.json() == {"errors": {"number": ["Not a valid integer."]}}
 
 
 def test_level_8_number_invalid_range(client: TestClient) -> None:
-    response = client.get(
-        "/level-8?number=0", headers={"X-Password": passwords.LEVEL_8}
+    response = client.post(
+        "/level-8", headers={"X-Password": passwords.LEVEL_8}, json={"number": 0}
     )
 
     assert response.status_code == HTTP_400_BAD_REQUEST
-    assert response.text == "0 is not between 1 and 1000."
+    assert response.json() == {
+        "errors": {
+            "number": [
+                "Must be greater than or equal to 1 and less than or equal to 1000."
+            ]
+        }
+    }
 
 
 def test_level_8_wrong_number(client: TestClient) -> None:
