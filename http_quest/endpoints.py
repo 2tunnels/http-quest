@@ -140,9 +140,7 @@ async def level_8(request: Request) -> JSONResponse:
     except ValidationError as exc:
         return JSONResponse({"errors": exc.messages}, status_code=HTTP_400_BAD_REQUEST)
 
-    given_number = data["number"]
-
-    if given_number != 372:
+    if data["number"] != 372:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Wrong number.")
 
     return JSONResponse({"password": passwords.LEVEL_9})

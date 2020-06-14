@@ -145,8 +145,8 @@ def test_level_8_number_invalid_range(client: TestClient) -> None:
 
 
 def test_level_8_wrong_number(client: TestClient) -> None:
-    response = client.get(
-        "/level-8?number=100", headers={"X-Password": passwords.LEVEL_8}
+    response = client.post(
+        "/level-8", headers={"X-Password": passwords.LEVEL_8}, json={"number": 100}
     )
 
     assert response.status_code == HTTP_403_FORBIDDEN
@@ -154,8 +154,8 @@ def test_level_8_wrong_number(client: TestClient) -> None:
 
 
 def test_level_8(client: TestClient) -> None:
-    response = client.get(
-        "/level-8?number=372", headers={"X-Password": passwords.LEVEL_8}
+    response = client.post(
+        "/level-8", headers={"X-Password": passwords.LEVEL_8}, json={"number": 372}
     )
 
     assert response.status_code == HTTP_200_OK
