@@ -8,16 +8,17 @@ from http_quest.asgi import application
 
 @pytest.fixture(
     params=[
-        {"path": "/level-1", "method": "GET"},
-        {"path": "/level-2", "method": "GET"},
-        {"path": "/level-3", "method": "GET"},
-        {"path": "/level-4", "method": "GET"},
-        {"path": "/level-5", "method": "DELETE"},
-        {"path": "/level-6", "method": "GET"},
-        {"path": "/level-7", "method": "GET"},
-        {"path": "/level-8", "method": "POST"},
-        {"path": "/level-9", "method": "GET"},
-        {"path": "/level-10", "method": "POST"},
+        {"path": "/level/1", "method": "GET"},
+        {"path": "/level/2", "method": "GET"},
+        {"path": "/level/3", "method": "GET"},
+        {"path": "/level/4", "method": "GET"},
+        {"path": "/level/5", "method": "DELETE"},
+        {"path": "/level/6", "method": "GET"},
+        {"path": "/level/7", "method": "GET"},
+        {"path": "/level/8", "method": "POST"},
+        {"path": "/level/9", "method": "GET"},
+        {"path": "/level/10", "method": "POST"},
+        {"path": "/level/11", "method": "POST"},
     ]
 )
 def level(request: SubRequest) -> dict:

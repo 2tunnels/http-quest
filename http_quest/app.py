@@ -1,38 +1,30 @@
 from starlette.applications import Starlette
-from starlette.routing import Route
+from starlette.routing import Mount, Route
 
-from .endpoints import (
-    home,
-    level_1,
-    level_2,
-    level_3,
-    level_4,
-    level_5,
-    level_6,
-    level_7,
-    level_8,
-    level_9,
-    level_10,
-    level_11,
-    robots_txt,
-)
+from . import endpoints, levels
 
 
 def get_application() -> Starlette:
     routes = [
-        Route("/", home, name="home"),
-        Route("/robots.txt", robots_txt, name="robots_txt"),
-        Route("/level-1", level_1, name="level_1"),
-        Route("/level-2", level_2, name="level_2"),
-        Route("/level-3", level_3, name="level_3"),
-        Route("/level-4", level_4, name="level_4"),
-        Route("/level-5", level_5, name="level_5", methods=["DELETE"]),
-        Route("/level-6", level_6, name="level_6"),
-        Route("/level-7", level_7, name="level_7"),
-        Route("/level-8", level_8, name="level_8", methods=["POST"]),
-        Route("/level-9", level_9, name="level_9"),
-        Route("/level-10", level_10, name="level_10", methods=["POST"]),
-        Route("/level-11", level_11, name="level_11", methods=["POST"]),
+        Route("/", endpoints.home, name="home"),
+        Route("/robots.txt", endpoints.robots, name="robots"),
+        Mount(
+            "/level",
+            name="level",
+            routes=[
+                Route("/1", levels.plain, name="plain"),
+                Route("/2", levels.reverse, name="reverse"),
+                Route("/3", levels.base64, name="base64"),
+                Route("/4", levels.header, name="header"),
+                Route("/5", levels.delete, name="delete", methods=["DELETE"]),
+                Route("/6", levels.redirect, name="redirect"),
+                Route("/7", levels.user_agent, name="user_agent"),
+                Route("/8", levels.guess_number, name="guess_number", methods=["POST"]),
+                Route("/9", levels.accept_language, name="accept_language"),
+                Route("/10", levels.mask, name="mask", methods=["POST"]),
+                Route("/11", levels.robots, name="robots", methods=["POST"]),
+            ],
+        ),
     ]
 
     return Starlette(routes=routes)
