@@ -32,6 +32,16 @@ docker-build:
 docker-run:
 	docker container run -it -p 8000:8000 http-quest
 
+helm-upgrade:
+	helm upgrade \
+		--atomic \
+		--install \
+		--namespace http-quest \
+		--set image.tag=v0.1.2 \
+		--set secrets.BUGSNAG_API_KEY=secret \
+		http-quest \
+		./charts/http-quest/
+
 patch:
 	bump2version patch
 	git push --follow-tags

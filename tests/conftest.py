@@ -3,9 +3,11 @@ from dataclasses import dataclass
 import pytest
 from _pytest.fixtures import SubRequest
 from starlette.applications import Starlette
+from starlette.config import environ
 from starlette.testclient import TestClient
 
-from http_quest.asgi import application
+environ["DEBUG"] = "False"
+environ["BUGSNAG_API_KEY"] = "secret"
 
 
 @dataclass
@@ -46,9 +48,11 @@ def level(request: SubRequest) -> Level:
 
 @pytest.fixture
 def app() -> Starlette:
+    from http_quest.asgi import application
+
     return application
 
 
 @pytest.fixture
 def client(app: Starlette) -> TestClient:
-    return TestClient(application)
+    return TestClient(app)

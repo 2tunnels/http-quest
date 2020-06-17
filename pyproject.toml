@@ -11,6 +11,7 @@ starlette = "^0.13.4"
 uvicorn = "^0.11.5"
 gunicorn = "^20.0.4"
 marshmallow = "^3.6.1"
+starlette-x-bugsnag = "^0.1.5"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

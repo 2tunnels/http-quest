@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: 2tunnels/http-quest
+  pullPolicy: Always
+  tag: CHANGE-ME
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+secrets:
+  BUGSNAG_API_KEY: CHANGE-ME
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: http-quest.2tunnels.com
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
