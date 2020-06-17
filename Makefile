@@ -25,3 +25,9 @@ lint: lint-isort lint-black lint-mypy lint-safety
 
 uvicorn:
 	uvicorn http_quest.asgi:application --reload
+
+docker-build:
+	docker image build -t http-quest .
+
+docker-run:
+	docker container run -it -p 8000:8000 http-quest
