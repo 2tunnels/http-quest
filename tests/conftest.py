@@ -7,7 +7,7 @@ from starlette.config import environ
 from starlette.testclient import TestClient
 
 environ["DEBUG"] = "False"
-environ["BUGSNAG_API_KEY"] = "secret"
+environ["BUGSNAG_API_KEY"] = ""
 
 
 @dataclass

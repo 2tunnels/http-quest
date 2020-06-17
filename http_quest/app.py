@@ -1,5 +1,4 @@
 from starlette.applications import Starlette
-from starlette.middleware import Middleware
 from starlette.routing import Mount, Route
 from starlette_x_bugsnag.middleware import BugsnagMiddleware
 
@@ -32,18 +31,17 @@ def get_application() -> Starlette:
         ),
     ]
 
-    release_stage = "development" if settings.DEBUG else "production"
+    app = Starlette(debug=settings.DEBUG, routes=routes, )
 
-    return Starlette(
-        debug=settings.DEBUG,
-        routes=routes,
-        middleware=[
-            Middleware(
-                BugsnagMiddleware,
-                api_key=str(settings.BUGSNAG_API_KEY),
-                app_version=__version__,
-                project_root=None,
-                release_stage=release_stage,
-            ),
-        ],
-    )
+    bugsnag_api_key = str(settings.BUGSNAG_API_KEY)
+
+    if bugsnag_api_key:
+        app.add_middleware(
+            BugsnagMiddleware,
+            api_key=bugsnag_api_key,
+            app_version=__version__,
+            project_root=None,
+            release_stage="development" if settings.DEBUG else "production",
+        )
+
+    return app
