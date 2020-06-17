@@ -2,4 +2,4 @@ apiVersion: v2
 name: http-quest
 description: A Helm chart for HTTP Quest
 type: application
-version: 0.1.2
+version: 0.1.3

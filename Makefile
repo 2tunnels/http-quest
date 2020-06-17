@@ -37,7 +37,7 @@ helm-upgrade:
 		--atomic \
 		--install \
 		--namespace http-quest \
-		--set image.tag=v0.1.2 \
+		--set image.tag=v0.1.3 \
 		--set secrets.BUGSNAG_API_KEY=secret \
 		http-quest \
 		./charts/http-quest/
