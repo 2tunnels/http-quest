@@ -31,7 +31,7 @@ def get_application() -> Starlette:
         ),
     ]
 
-    app = Starlette(debug=settings.DEBUG, routes=routes, )
+    app = Starlette(debug=settings.DEBUG, routes=routes,)
 
     bugsnag_api_key = str(settings.BUGSNAG_API_KEY)
 
