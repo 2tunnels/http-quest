@@ -6,18 +6,20 @@ from starlette.testclient import TestClient
 from http_quest import passwords, secrets
 from http_quest.utils import base64_decode
 
+from .conftest import Level
 
-def test_require_password(level: dict, client: TestClient) -> None:
-    response = client.request(level["method"], level["path"])
+
+def test_require_password(level: Level, app: Starlette, client: TestClient) -> None:
+    url = app.url_path_for(level.get_route_name())
+    response = client.request(level.method, url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.text == "X-Password header is required"
 
 
-def test_password_is_wrong(level: dict, client: TestClient) -> None:
-    response = client.request(
-        level["method"], level["path"], headers={"X-Password": "qwerty"}
-    )
+def test_wrong_password(level: Level, app: Starlette, client: TestClient) -> None:
+    url = app.url_path_for(level.get_route_name())
+    response = client.request(level.method, url, headers={"X-Password": "qwerty"})
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.text == "X-Password header is wrong"
@@ -82,26 +84,7 @@ def test_delete(client: TestClient, app: Starlette) -> None:
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"password": passwords.REDIRECT}
-
-
-def test_redirect_secret_is_wrong(client: TestClient, app: Starlette) -> None:
-    response = client.get(
-        app.url_path_for("level:redirect") + "?secret=qwerty",
-        headers={"X-Password": passwords.REDIRECT},
-    )
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.text == "Secret is wrong."
-
-
-def test_redirect(client: TestClient, app: Starlette) -> None:
-    response = client.get(
-        app.url_path_for("level:redirect"), headers={"X-Password": passwords.REDIRECT}
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.history) == 20
+    assert response.json() == {"password": passwords.USER_AGENT}
 
 
 def test_user_agent_is_not_ie_6(client: TestClient, app: Starlette) -> None:
@@ -124,72 +107,6 @@ def test_user_agent(client: TestClient, app: Starlette) -> None:
             "X-Password": passwords.USER_AGENT,
             "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",
         },
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"password": passwords.NUMBER}
-
-
-def test_guess_number_is_missing(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:guess_number"), headers={"X-Password": passwords.NUMBER}
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {
-        "errors": {"number": ["Missing data for required field."]}
-    }
-
-
-def test_guess_number_is_not_a_valid_integer(
-    client: TestClient, app: Starlette
-) -> None:
-    response = client.post(
-        app.url_path_for("level:guess_number"),
-        headers={"X-Password": passwords.NUMBER},
-        json={"number": "foobar"},
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"errors": {"number": ["Not a valid integer."]}}
-
-
-@pytest.mark.parametrize("number", [0, 1001])
-def test_guess_number_invalid_range(
-    number: int, client: TestClient, app: Starlette
-) -> None:
-    response = client.post(
-        app.url_path_for("level:guess_number"),
-        headers={"X-Password": passwords.NUMBER},
-        json={"number": number},
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {
-        "errors": {
-            "number": [
-                "Must be greater than or equal to 1 and less than or equal to 1000."
-            ]
-        }
-    }
-
-
-def test_guess_number_is_wrong(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:guess_number"),
-        headers={"X-Password": passwords.NUMBER},
-        json={"number": 100},
-    )
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.text == "Number is wrong."
-
-
-def test_guess_number(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:guess_number"),
-        headers={"X-Password": passwords.NUMBER},
-        json={"number": 372},
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -226,40 +143,27 @@ def test_accept_language(client: TestClient, app: Starlette) -> None:
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"пароль": passwords.MASK}
+    assert response.json() == {"пароль": passwords.REDIRECT}
 
 
-def test_mask_secret_is_missing(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:mask"), headers={"X-Password": passwords.MASK}
+def test_redirect_secret_is_wrong(client: TestClient, app: Starlette) -> None:
+    response = client.get(
+        app.url_path_for("level:redirect") + "?secret=qwerty",
+        headers={"X-Password": passwords.REDIRECT},
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {
-        "errors": {"secret": ["Missing data for required field."]}
-    }
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.text == "Secret is wrong."
 
 
-def test_mask_secret_is_wrong(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:mask"),
-        headers={"X-Password": passwords.MASK},
-        json={"secret": "eeeeeeeeeeeeeeeeeeee"},
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"password": "***L****9***********"}
-
-
-def test_mask(client: TestClient, app: Starlette) -> None:
-    response = client.post(
-        app.url_path_for("level:mask"),
-        headers={"X-Password": passwords.MASK},
-        json={"secret": secrets.MASK},
+def test_redirect(client: TestClient, app: Starlette) -> None:
+    response = client.get(
+        app.url_path_for("level:redirect"), headers={"X-Password": passwords.REDIRECT}
     )
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"password": passwords.ROBOTS}
+    assert len(response.history) == 20
 
 
 def test_robots_secret_is_missing(client: TestClient, app: Starlette) -> None:
@@ -292,4 +196,113 @@ def test_robots(client: TestClient, app: Starlette) -> None:
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"password": passwords.LEVEL_12}
+    assert response.json() == {"password": passwords.GUESS_NUMBER}
+
+
+def test_guess_number_is_missing(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:guess_number"),
+        headers={"X-Password": passwords.GUESS_NUMBER},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {"number": ["Missing data for required field."]}
+    }
+
+
+def test_guess_number_is_not_a_valid_integer(
+    client: TestClient, app: Starlette
+) -> None:
+    response = client.post(
+        app.url_path_for("level:guess_number"),
+        headers={"X-Password": passwords.GUESS_NUMBER},
+        json={"number": "foobar"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"errors": {"number": ["Not a valid integer."]}}
+
+
+@pytest.mark.parametrize("number", [0, 1001])
+def test_guess_number_invalid_range(
+    number: int, client: TestClient, app: Starlette
+) -> None:
+    response = client.post(
+        app.url_path_for("level:guess_number"),
+        headers={"X-Password": passwords.GUESS_NUMBER},
+        json={"number": number},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {
+            "number": [
+                "Must be greater than or equal to 1 and less than or equal to 1000."
+            ]
+        }
+    }
+
+
+def test_guess_number_is_wrong(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:guess_number"),
+        headers={"X-Password": passwords.GUESS_NUMBER},
+        json={"number": 100},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.text == "Number is wrong."
+
+
+def test_guess_number(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:guess_number"),
+        headers={"X-Password": passwords.GUESS_NUMBER},
+        json={"number": 372},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"password": passwords.MASK}
+
+
+def test_mask_secret_is_missing(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:mask"), headers={"X-Password": passwords.MASK}
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "errors": {"secret": ["Missing data for required field."]}
+    }
+
+
+def test_mask_secret_is_wrong(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:mask"),
+        headers={"X-Password": passwords.MASK},
+        json={"secret": "eeeeeeeeeeeeeeeeeeee"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"password": "***u****7***********"}
+
+
+def test_mask(client: TestClient, app: Starlette) -> None:
+    response = client.post(
+        app.url_path_for("level:mask"),
+        headers={"X-Password": passwords.MASK},
+        json={"secret": secrets.MASK},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"password": passwords.FINISH}
+
+
+def test_finish(client: TestClient, app: Starlette) -> None:
+    response = client.get(
+        app.url_path_for("level:finish"), headers={"X-Password": passwords.FINISH},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "You have completed the very last level of HTTP quest." in response.text
