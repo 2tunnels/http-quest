@@ -31,3 +31,7 @@ docker-build:
 
 docker-run:
 	docker container run -it -p 8000:8000 http-quest
+
+patch:
+	bump2version patch
+	git push --follow-tags
